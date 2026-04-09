@@ -726,13 +726,33 @@ const C = {
 };
 
 const initialised = {};
+const chartsByTab = {};
+
+function rememberChart(name, chart) {
+  if (!chartsByTab[name]) chartsByTab[name] = [];
+  chartsByTab[name].push(chart);
+  return chart;
+}
+
+function resizeTabCharts(name) {
+  (chartsByTab[name] || []).forEach(chart => chart.resize());
+}
+
+function queueTabInit(name) {
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      initTab(name);
+      resizeTabCharts(name);
+    });
+  });
+}
 
 function initTab(name) {
   if (initialised[name]) return;
   initialised[name] = true;
 
   if (name === 'overview') {
-    new Chart(document.getElementById('chartMortality'), {
+    rememberChart('overview', new Chart(document.getElementById('chartMortality'), {
       type:'bar',
       data:{
         labels:['Pre-COVID','During COVID','Post-COVID'],
@@ -746,12 +766,12 @@ function initTab(name) {
         plugins:{legend:{labels:{font:{size:11}}}},
         scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+'%'},max:45,grid:{color:'#F3F4F6'}}}
       }
-    });
+    }));
   }
 
   if (name === 'trends') {
     /* Annual stacked bar */
-    new Chart(document.getElementById('chartAnnual'), {
+    rememberChart('trends', new Chart(document.getElementById('chartAnnual'), {
       type:'bar',
       data:{
         labels:['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
@@ -767,7 +787,7 @@ function initTab(name) {
           y:{stacked:true,ticks:{callback:v=>(v/1000)+'k'},grid:{color:'#F3F4F6'}}
         }
       }
-    });
+    }));
 
     /* Monthly line (dual axis) */
     const mt=[7780,7030,8170,9865,10325,9965,10255,9980,9485,9865,9725,10445,10440,9200,9670,8665,8815,8375,8970,8905,8210,8495,8240,8420,8785,7765,8090,8080,8085,7595,8270,8085,7740,7795,7545,7995,7350,6530,5500,4335,4730,5135,5795,6445,6160,6475,5975,6230,6330,5420,6040,6120,6480,6460,6660,6580,6400,6425,6330,6475,6160,5780,6460,6175,6525,6375,6710,6475,6425,6730,6475,7470,6610,5785,6505,6225,6495,6565,6635,6675,6420,6560,6355,6655,6455,5890,6165,6045,6410,6030,6115,6265,6010,6385,5980,6210,6035,5255,5855,5435,5590,5740];
@@ -775,7 +795,7 @@ function initTab(name) {
     const ml=[];for(let y=2017;y<=2025;y++){const mx=y===2025?6:12;for(let m=1;m<=mx;m++)ml.push(y+'-'+(m<10?'0':'')+m);}
     const mp=mt.map((v,i)=>((mr[i]/v)*100).toFixed(1));
 
-    new Chart(document.getElementById('chartMonthly'), {
+    rememberChart('trends', new Chart(document.getElementById('chartMonthly'), {
       type:'line',
       data:{labels:ml,datasets:[
         {label:'Total BSI',data:mt,borderColor:C.indigo,backgroundColor:C.indigoA,fill:true,tension:0.35,pointRadius:0,borderWidth:2,yAxisID:'y'},
@@ -789,10 +809,10 @@ function initTab(name) {
           y1:{position:'right',min:4,max:12,ticks:{callback:v=>v+'%',color:C.red},grid:{display:false}}
         }
       }
-    });
+    }));
 
     /* % Resistant trend */
-    new Chart(document.getElementById('chartPctResistant'), {
+    rememberChart('trends', new Chart(document.getElementById('chartPctResistant'), {
       type:'line',
       data:{labels:['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
         datasets:[{label:'% Resistant',data:[6.8,7.3,7.4,8.0,8.2,7.7,8.0,8.8,8.9],
@@ -803,12 +823,12 @@ function initTab(name) {
         plugins:{legend:{display:false}},
         scales:{y:{min:5,max:10,ticks:{callback:v=>v+'%'},grid:{color:'#F3F4F6'}}}
       }
-    });
+    }));
   }
 
   if (name === 'demographics') {
     /* Ethnicity */
-    new Chart(document.getElementById('chartEthnicity'), {
+    rememberChart('demographics', new Chart(document.getElementById('chartEthnicity'), {
       type:'doughnut',
       data:{labels:['White (91.9%)','Asian (4.5%)','Black (1.4%)','Chinese/Other (0.8%)','Mixed (0.7%)','Missing (0.7%)'],
         datasets:[{data:[665945,32760,9950,5840,4765,5365],backgroundColor:[C.indigo,'#D97706','#DB2777','#16A34A','#7C78EA','#D1D5DB'],borderWidth:0}]
@@ -816,10 +836,10 @@ function initTab(name) {
       options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
         plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}
       }
-    });
+    }));
 
     /* Region */
-    new Chart(document.getElementById('chartRegion'), {
+    rememberChart('demographics', new Chart(document.getElementById('chartRegion'), {
       type:'bar',
       data:{labels:['East','E.Mid','Yorks','S.West','N.West','S.East','N.East','London','W.Mid','NA'],
         datasets:[{data:[160115,147210,101355,80525,71160,44255,34080,30020,27980,27925],backgroundColor:'rgba(94,90,219,0.55)',borderRadius:6,barPercentage:0.7}]
@@ -828,12 +848,12 @@ function initTab(name) {
         plugins:{legend:{display:false}},
         scales:{x:{ticks:{callback:v=>(v/1000)+'k'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:10}},grid:{display:false}}}
       }
-    });
+    }));
 
     /* Comorbidities */
     const cL=['CKD','Hypertension','CHD (PRIMIS)','Anxiety/depression','Cancer','CNS disease','Diabetes','CKD 3-5','Hearing loss','Atrial fib','CHD','Resp disease','Asthma','Stroke/TIA','Heart failure','COPD','Connective tissue','Immunosuppression dx','Dementia','IBS','CLD','Chemotherapy','Severe mental illness','Severe obesity','Learning disability','Asplenia'];
     const cV=[91.5,49.3,44.6,37.5,28.7,27.9,25.5,23.4,21.6,18.3,17.9,17.5,16.0,12.8,12.6,12.0,10.7,9.8,9.5,6.8,5.9,5.9,2.7,1.9,1.5,1.2];
-    new Chart(document.getElementById('chartComorb'), {
+    rememberChart('demographics', new Chart(document.getElementById('chartComorb'), {
       type:'bar',
       data:{labels:cL,
         datasets:[{data:cV,backgroundColor:cV.map(v=>v>40?'rgba(220,38,38,0.55)':v>20?'rgba(217,119,6,0.55)':v>10?'rgba(94,90,219,0.45)':'rgba(22,163,74,0.45)'),borderRadius:6,barPercentage:0.7}]
@@ -842,7 +862,7 @@ function initTab(name) {
         plugins:{legend:{display:false}},
         scales:{x:{ticks:{callback:v=>v+'%'},max:100,grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9.5}},grid:{display:false}}}
       }
-    });
+    }));
   }
 }
 
@@ -852,12 +872,12 @@ function go(name) {
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
-  /* Init charts after the tab is visible */
-  requestAnimationFrame(() => initTab(name));
+  /* Init charts only after the tab is visible and layout has settled */
+  queueTabInit(name);
 }
 
 /* Init the default visible tab */
-initTab('overview');
+queueTabInit('overview');
 </script>
 
 </body>
