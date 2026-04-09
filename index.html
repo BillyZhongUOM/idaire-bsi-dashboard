@@ -4,174 +4,494 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IDAIRE-BSI Study Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4"></script>
 <style>
-  :root {
-    --bg: #0f172a; --card: #1e293b; --border: #334155;
-    --text: #e2e8f0; --muted: #94a3b8; --accent: #38bdf8;
-    --green: #4ade80; --red: #f87171; --amber: #fbbf24;
-    --blue: #60a5fa; --purple: #a78bfa; --pink: #f472b6;
-  }
-  * { margin:0; padding:0; box-sizing:border-box; }
-  body { font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); padding: 24px; max-width: 1400px; margin: 0 auto; }
-  h1 { font-size: 1.8rem; font-weight: 700; margin-bottom: 4px; }
-  h2 { font-size: 1.25rem; font-weight: 600; margin-bottom: 12px; color: var(--accent); }
-  h3 { font-size: 1rem; font-weight: 600; margin-bottom: 8px; }
-  .subtitle { color: var(--muted); font-size: 0.9rem; margin-bottom: 24px; }
-  .grid { display: grid; gap: 20px; margin-bottom: 24px; }
-  .grid-2 { grid-template-columns: 1fr 1fr; }
-  .grid-3 { grid-template-columns: 1fr 1fr 1fr; }
-  .grid-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
-  .kpi { text-align: center; }
-  .kpi .value { font-size: 2.2rem; font-weight: 800; line-height: 1.2; }
-  .kpi .label { font-size: 0.8rem; color: var(--muted); margin-top: 4px; }
-  .kpi .sub { font-size: 0.75rem; color: var(--muted); margin-top: 2px; }
-  table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
-  th, td { padding: 6px 10px; text-align: left; border-bottom: 1px solid var(--border); }
-  th { color: var(--muted); font-weight: 600; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.5px; }
-  td.num { text-align: right; font-variant-numeric: tabular-nums; }
-  .badge { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 0.7rem; font-weight: 600; }
-  .badge-green { background: rgba(74,222,128,0.15); color: var(--green); }
-  .badge-amber { background: rgba(251,191,36,0.15); color: var(--amber); }
-  .badge-red { background: rgba(248,113,113,0.15); color: var(--red); }
-  .badge-blue { background: rgba(96,165,250,0.15); color: var(--blue); }
-  .section-divider { border: none; border-top: 2px solid var(--accent); margin: 32px 0 24px; opacity: 0.3; }
-  .section-title { font-size: 1.4rem; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 8px; }
-  .concern-item { padding: 10px 14px; background: rgba(248,113,113,0.08); border-left: 3px solid var(--red); border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 0.85rem; }
-  .fix-item { padding: 10px 14px; background: rgba(74,222,128,0.08); border-left: 3px solid var(--green); border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 0.85rem; }
-  .next-item { padding: 10px 14px; background: rgba(56,189,248,0.08); border-left: 3px solid var(--accent); border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 0.85rem; }
-  .chart-container { position: relative; height: 280px; }
-  .chart-container-tall { position: relative; height: 350px; }
-  .tag { font-size: 0.7rem; color: var(--muted); background: rgba(148,163,184,0.1); padding: 1px 6px; border-radius: 3px; }
-  .pipeline-step { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 0.85rem; }
-  .pipeline-step:last-child { border-bottom: none; }
-  .pipeline-status { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-  .status-done { background: var(--green); }
-  .status-pending { background: var(--amber); }
-  .status-new { background: var(--accent); }
+/* ============================================================
+   DESIGN SYSTEM — Bento Grid / Light SaaS
+   ============================================================ */
+:root {
+  --bg: #F5F5F7;
+  --card: #FFFFFF;
+  --shadow: 0 4px 20px rgba(0,0,0,0.05);
+  --shadow-hover: 0 8px 32px rgba(0,0,0,0.09);
+  --radius: 24px;
+  --radius-sm: 12px;
+  --radius-pill: 999px;
 
-  /* Tab navigation */
-  .tabs { display: flex; gap: 4px; margin-bottom: 24px; flex-wrap: wrap; }
-  .tab { padding: 8px 18px; background: var(--card); border: 1px solid var(--border); border-radius: 8px; cursor: pointer; font-size: 0.85rem; color: var(--muted); transition: all 0.2s; }
-  .tab:hover { border-color: var(--accent); color: var(--text); }
-  .tab.active { background: rgba(56,189,248,0.15); border-color: var(--accent); color: var(--accent); }
-  .tab-content { display: none; }
-  .tab-content.active { display: block; }
+  --heading: #1A1A1A;
+  --text: #374151;
+  --muted: #6B7280;
+  --light: #9CA3AF;
+  --border: #E5E7EB;
 
-  @media (max-width: 900px) { .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; } }
+  --primary: #5E5ADB;
+  --primary-light: rgba(94,90,219,0.08);
+  --primary-mid: rgba(94,90,219,0.15);
+
+  --green: #16A34A;
+  --green-bg: rgba(22,163,74,0.08);
+  --red: #DC2626;
+  --red-bg: rgba(220,38,38,0.06);
+  --amber: #D97706;
+  --amber-bg: rgba(217,119,6,0.08);
+  --blue: #2563EB;
+  --blue-bg: rgba(37,99,235,0.08);
+  --pink: #DB2777;
+
+  --gap: 24px;
+  --pad: 32px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ---- Layout Shell ---- */
+.shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* ---- Sidebar ---- */
+.sidebar {
+  width: 260px;
+  background: var(--card);
+  border-right: 1px solid var(--border);
+  padding: 32px 20px;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  display: flex;
+  flex-direction: column;
+  z-index: 10;
+}
+.sidebar-logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.sidebar-logo .icon {
+  width: 36px; height: 36px;
+  background: linear-gradient(135deg, var(--primary), #7C78EA);
+  border-radius: var(--radius-sm);
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 1.1rem; font-weight: 700;
+}
+.sidebar-logo h1 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--heading);
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+}
+.sidebar-sub {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin-bottom: 32px;
+  padding-left: 46px;
+}
+.nav-section {
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--light);
+  margin: 20px 0 8px 12px;
+}
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-bottom: 2px;
+}
+.nav-item:hover {
+  background: var(--bg);
+  color: var(--heading);
+}
+.nav-item.active {
+  background: var(--primary-light);
+  color: var(--primary);
+  font-weight: 600;
+}
+.nav-item svg {
+  width: 18px; height: 18px;
+  flex-shrink: 0;
+  opacity: 0.5;
+}
+.nav-item.active svg { opacity: 1; }
+.sidebar-footer {
+  margin-top: auto;
+  font-size: 0.7rem;
+  color: var(--light);
+  padding: 12px;
+  line-height: 1.5;
+}
+
+/* ---- Main Content ---- */
+.main {
+  margin-left: 260px;
+  flex: 1;
+  padding: 32px 40px 48px;
+  max-width: 1280px;
+}
+
+/* ---- Page Header ---- */
+.page-header {
+  margin-bottom: 28px;
+}
+.page-header h2 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--heading);
+  letter-spacing: -0.02em;
+}
+.page-header p {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin-top: 4px;
+}
+
+/* ---- Grid ---- */
+.grid { display: grid; gap: var(--gap); margin-bottom: var(--gap); }
+.g2 { grid-template-columns: 1fr 1fr; }
+.g3 { grid-template-columns: 1fr 1fr 1fr; }
+.g4 { grid-template-columns: repeat(4, 1fr); }
+.g-13 { grid-template-columns: 1fr 2fr; }
+.g-31 { grid-template-columns: 2fr 1fr; }
+
+/* ---- Cards ---- */
+.card {
+  background: var(--card);
+  border-radius: var(--radius);
+  padding: var(--pad);
+  box-shadow: var(--shadow);
+  transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+}
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-hover);
+}
+.card-flat { box-shadow: none; border: 1px solid var(--border); }
+.card-flat:hover { transform: none; box-shadow: none; }
+
+/* ---- KPI Cards ---- */
+.kpi {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.kpi .kpi-label {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.kpi .kpi-value {
+  font-size: 2rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.15;
+}
+.kpi .kpi-sub {
+  font-size: 0.78rem;
+  color: var(--light);
+  margin-top: 2px;
+}
+
+/* ---- Section Headers ---- */
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+.section-header h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--heading);
+  letter-spacing: -0.02em;
+}
+.section-header .dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--primary);
+}
+
+/* ---- Card Headers ---- */
+.card-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--heading);
+  letter-spacing: -0.01em;
+  margin-bottom: 16px;
+}
+
+/* ---- Tables ---- */
+table { width: 100%; border-collapse: collapse; }
+th, td {
+  padding: 10px 12px;
+  text-align: left;
+  font-size: 0.82rem;
+}
+th {
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--light);
+  border-bottom: 1px solid var(--border);
+}
+td { border-bottom: 1px solid #F3F4F6; color: var(--text); }
+tr:last-child td { border-bottom: none; }
+td.num { text-align: right; font-variant-numeric: tabular-nums; }
+td code {
+  background: #F3F4F6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.78rem;
+  color: var(--primary);
+}
+
+/* ---- Pills / Badges ---- */
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 4px 12px;
+  border-radius: var(--radius-pill);
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+}
+.pill-green { background: var(--green-bg); color: var(--green); }
+.pill-amber { background: var(--amber-bg); color: var(--amber); }
+.pill-red { background: var(--red-bg); color: var(--red); }
+.pill-blue { background: var(--blue-bg); color: var(--blue); }
+.pill-primary { background: var(--primary-light); color: var(--primary); }
+
+/* ---- Concern / Fix / Next Items ---- */
+.item-list { display: flex; flex-direction: column; gap: 10px; }
+.item {
+  padding: 14px 18px;
+  border-radius: 16px;
+  font-size: 0.84rem;
+  line-height: 1.5;
+}
+.item strong { font-weight: 600; }
+.item-concern { background: var(--red-bg); }
+.item-fix { background: var(--green-bg); }
+.item-next { background: var(--blue-bg); }
+.item .pill { margin-left: 6px; font-size: 0.68rem; }
+
+/* ---- Pipeline Steps ---- */
+.pipeline { display: flex; flex-direction: column; gap: 6px; }
+.pipe-step {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 16px;
+  background: #FAFAFA;
+  transition: background 0.2s;
+}
+.pipe-step:hover { background: #F3F4F6; }
+.pipe-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.pipe-dot-done { background: var(--green); }
+.pipe-dot-pending { background: var(--amber); }
+.pipe-dot-new { background: var(--primary); }
+.pipe-name { font-weight: 600; font-size: 0.85rem; color: var(--heading); }
+.pipe-desc { font-size: 0.75rem; color: var(--muted); margin-left: auto; }
+
+/* ---- Chart Containers ---- */
+.chart-box { position: relative; }
+.chart-box.h200 { height: 200px; }
+.chart-box.h250 { height: 250px; }
+.chart-box.h280 { height: 280px; }
+.chart-box.h320 { height: 320px; }
+.chart-box.h400 { height: 400px; }
+
+/* ---- Tab Content ---- */
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ---- Responsive ---- */
+@media (max-width: 1024px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 24px 20px; }
+  .g2, .g3, .g4, .g-13, .g-31 { grid-template-columns: 1fr; }
+}
 </style>
 </head>
 <body>
 
-<h1>IDAIRE-BSI Study Dashboard</h1>
-<div class="subtitle">Inequalities &amp; Risk Factors for Antimicrobial-Resistant Bloodstream Infections in England<br>
-OpenSAFELY-TPP · 2017–2025 · Last updated: April 2026</div>
-
-<!-- Tab Navigation -->
-<div class="tabs">
-  <div class="tab active" onclick="switchTab('overview')">Overview</div>
-  <div class="tab" onclick="switchTab('trends')">Trends</div>
-  <div class="tab" onclick="switchTab('demographics')">Demographics &amp; Comorbidities</div>
-  <div class="tab" onclick="switchTab('changes')">Changes &amp; Concerns</div>
-  <div class="tab" onclick="switchTab('pipeline')">Pipeline &amp; Next Steps</div>
-</div>
+<div class="shell">
 
 <!-- ============================================================ -->
-<!-- TAB 1: OVERVIEW -->
+<!-- SIDEBAR -->
 <!-- ============================================================ -->
-<div id="tab-overview" class="tab-content active">
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="icon">B</div>
+    <h1>IDAIRE-BSI</h1>
+  </div>
+  <div class="sidebar-sub">OpenSAFELY-TPP &middot; 2017&ndash;2025</div>
 
-<div class="grid grid-4">
+  <div class="nav-section">Dashboard</div>
+  <div class="nav-item active" onclick="go('overview')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+    Overview
+  </div>
+  <div class="nav-item" onclick="go('trends')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+    Trends
+  </div>
+  <div class="nav-item" onclick="go('demographics')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+    Demographics
+  </div>
+
+  <div class="nav-section">Review</div>
+  <div class="nav-item" onclick="go('changes')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+    Changes &amp; Fixes
+  </div>
+  <div class="nav-item" onclick="go('pipeline')">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+    Pipeline
+  </div>
+
+  <div class="sidebar-footer">
+    All counts rounded per OpenSAFELY SDC policy (nearest 5, cells 1&ndash;7 redacted).<br><br>
+    Last updated: April 2026
+  </div>
+</aside>
+
+<!-- ============================================================ -->
+<!-- MAIN CONTENT -->
+<!-- ============================================================ -->
+<div class="main">
+
+<!-- ==================== OVERVIEW ==================== -->
+<div id="tab-overview" class="tab-panel active">
+
+<div class="page-header">
+  <h2>Study Overview</h2>
+  <p>Hospital ICD-10 BSI Cohort &middot; Round 1 Results &middot; TPP (~40% of England)</p>
+</div>
+
+<!-- KPIs -->
+<div class="grid g4">
   <div class="card kpi">
-    <div class="value" style="color:var(--accent)">724,625</div>
-    <div class="label">Total BSI Patients</div>
-    <div class="sub">TPP (~40% of England)</div>
+    <span class="kpi-label">Total BSI Patients</span>
+    <span class="kpi-value" style="color:var(--primary)">724,625</span>
+    <span class="kpi-sub">9 years, 2017&ndash;2025</span>
   </div>
   <div class="card kpi">
-    <div class="value" style="color:var(--amber)">56,040</div>
-    <div class="label">Resistant BSI</div>
-    <div class="sub">ICD-10 U82/U83</div>
+    <span class="kpi-label">Resistant BSI</span>
+    <span class="kpi-value" style="color:var(--amber)">56,040</span>
+    <span class="kpi-sub">ICD-10 U82 / U83</span>
   </div>
   <div class="card kpi">
-    <div class="value" style="color:var(--red)">7.7%</div>
-    <div class="label">AMR Proportion</div>
-    <div class="sub">6.8% (2017) → 8.9% (2025)</div>
+    <span class="kpi-label">AMR Proportion</span>
+    <span class="kpi-value" style="color:var(--red)">7.7%</span>
+    <span class="kpi-sub">6.8% (2017) &rarr; 8.9% (2025)</span>
   </div>
   <div class="card kpi">
-    <div class="value" style="color:var(--pink)">18.5%</div>
-    <div class="label">30-Day Mortality</div>
-    <div class="sub">90d: 26.2% · 365d: 36.2%</div>
+    <span class="kpi-label">30-Day Mortality</span>
+    <span class="kpi-value" style="color:var(--pink)">18.5%</span>
+    <span class="kpi-sub">90d: 26.2% &middot; 365d: 36.2%</span>
   </div>
 </div>
 
-<div class="grid grid-2">
+<!-- Cases by period + Mortality chart -->
+<div class="grid g2">
   <div class="card">
-    <h3>Cases by COVID Period</h3>
+    <div class="card-title">Cases by COVID Period</div>
     <table>
       <tr><th>Period</th><th class="num">N</th><th class="num">%</th><th class="num">30d Mortality</th></tr>
-      <tr><td>Pre-COVID (2017-01 to 2020-02)</td><td class="num">329,010</td><td class="num">45.4%</td><td class="num">17.4%</td></tr>
-      <tr><td>During COVID (2020-03 to 2021-12)</td><td class="num">132,500</td><td class="num">18.3%</td><td class="num" style="color:var(--red)">20.8%</td></tr>
-      <tr><td>Post-COVID (2022-01 to 2025-06)</td><td class="num">263,115</td><td class="num">36.3%</td><td class="num">18.7%</td></tr>
+      <tr><td>Pre-COVID <span style="color:var(--light);font-size:0.75rem">(2017-01 to 2020-02)</span></td><td class="num">329,010</td><td class="num">45.4%</td><td class="num">17.4%</td></tr>
+      <tr><td>During COVID <span style="color:var(--light);font-size:0.75rem">(2020-03 to 2021-12)</span></td><td class="num">132,500</td><td class="num">18.3%</td><td class="num" style="color:var(--red);font-weight:600">20.8%</td></tr>
+      <tr><td>Post-COVID <span style="color:var(--light);font-size:0.75rem">(2022-01 to 2025-06)</span></td><td class="num">263,115</td><td class="num">36.3%</td><td class="num">18.7%</td></tr>
     </table>
   </div>
   <div class="card">
-    <h3>Mortality by Period</h3>
-    <div class="chart-container" style="height:220px">
-      <canvas id="chartMortality"></canvas>
-    </div>
+    <div class="card-title">Mortality by Period</div>
+    <div class="chart-box h250"><canvas id="chartMortality"></canvas></div>
   </div>
 </div>
 
-<div class="grid grid-2">
+<!-- Primary diagnoses + Study design -->
+<div class="grid g2">
   <div class="card">
-    <h3>Top Primary Diagnoses (ICD-10)</h3>
+    <div class="card-title">Top Primary Diagnoses (ICD-10)</div>
     <table>
-      <tr><th>Code</th><th>Description</th><th class="num">N</th><th class="num">%</th></tr>
-      <tr><td><code>A415</code></td><td>Sepsis due to other Gram-negative organisms</td><td class="num">10,275</td><td class="num">1.4%</td></tr>
-      <tr><td><code>A419</code></td><td>Sepsis, unspecified</td><td class="num">7,480</td><td class="num">1.0%</td></tr>
-      <tr><td><code>T814</code></td><td>Infection following a procedure</td><td class="num">3,660</td><td class="num">0.5%</td></tr>
-      <tr><td><code>N390</code></td><td>Urinary tract infection, site not specified</td><td class="num">2,390</td><td class="num">0.3%</td></tr>
-      <tr><td><code>A410</code></td><td>Sepsis due to Staphylococcus aureus</td><td class="num">1,575</td><td class="num">0.2%</td></tr>
-      <tr><td><code>J181</code></td><td>Lobar pneumonia, unspecified</td><td class="num">1,205</td><td class="num">0.2%</td></tr>
-      <tr><td><code>A418</code></td><td>Other specified sepsis</td><td class="num">720</td><td class="num">0.1%</td></tr>
-      <tr><td><code>U071</code></td><td>COVID-19, virus identified</td><td class="num">610</td><td class="num">0.1%</td></tr>
+      <tr><th>Code</th><th>Description</th><th class="num">N</th></tr>
+      <tr><td><code>A415</code></td><td>Sepsis, other Gram-negative</td><td class="num">10,275</td></tr>
+      <tr><td><code>A419</code></td><td>Sepsis, unspecified</td><td class="num">7,480</td></tr>
+      <tr><td><code>T814</code></td><td>Infection following procedure</td><td class="num">3,660</td></tr>
+      <tr><td><code>N390</code></td><td>Urinary tract infection</td><td class="num">2,390</td></tr>
+      <tr><td><code>A410</code></td><td>Sepsis, S. aureus</td><td class="num">1,575</td></tr>
+      <tr><td><code>J181</code></td><td>Lobar pneumonia</td><td class="num">1,205</td></tr>
+      <tr><td><code>U071</code></td><td>COVID-19</td><td class="num">610</td></tr>
     </table>
-    <div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">Note: primary diagnosis ≠ BSI code; BSI identified from any diagnostic position</div>
+    <p style="font-size:0.75rem;color:var(--light);margin-top:12px">Primary diagnosis &ne; BSI code; BSI identified from any diagnostic position.</p>
   </div>
   <div class="card">
-    <h3>Study Design</h3>
+    <div class="card-title">Study Design</div>
     <table>
-      <tr><td style="color:var(--muted)">Platform</td><td>OpenSAFELY-TPP (~24M patients)</td></tr>
-      <tr><td style="color:var(--muted)">Study period</td><td>2017-01-01 to 2025-12-31</td></tr>
-      <tr><td style="color:var(--muted)">BSI identification</td><td>ICD-10 (hospital) + SNOMED (primary care)</td></tr>
-      <tr><td style="color:var(--muted)">AMR definition</td><td>ICD-10 U82/U83 (hospital); SNOMED AMR ±14d (GP)</td></tr>
-      <tr><td style="color:var(--muted)">Registration</td><td>≥1 year before index date</td></tr>
-      <tr><td style="color:var(--muted)">Comorbidities</td><td>39 conditions (Bristol 16 + QOF + PRIMIS + CPRD)</td></tr>
-      <tr><td style="color:var(--muted)">Antibiotic classes</td><td>12 classes from 3,663 DMD codes</td></tr>
-      <tr><td style="color:var(--muted)">SDC</td><td>Counts rounded to 5; cells 1–7 redacted</td></tr>
+      <tr><td style="color:var(--light);width:40%">Platform</td><td style="font-weight:500">OpenSAFELY-TPP (~24M patients)</td></tr>
+      <tr><td style="color:var(--light)">Study period</td><td style="font-weight:500">2017-01-01 to 2025-12-31</td></tr>
+      <tr><td style="color:var(--light)">BSI identification</td><td style="font-weight:500">ICD-10 (hospital) + SNOMED (primary care)</td></tr>
+      <tr><td style="color:var(--light)">AMR definition</td><td style="font-weight:500">ICD-10 U82/U83; SNOMED AMR &plusmn;14d (GP)</td></tr>
+      <tr><td style="color:var(--light)">Registration</td><td style="font-weight:500">&ge;1 year before index date</td></tr>
+      <tr><td style="color:var(--light)">Comorbidities</td><td style="font-weight:500">39 conditions</td></tr>
+      <tr><td style="color:var(--light)">Antibiotic classes</td><td style="font-weight:500">12 classes (3,663 DMD codes)</td></tr>
+      <tr><td style="color:var(--light)">SDC</td><td style="font-weight:500">Counts rounded to 5; cells 1&ndash;7 redacted</td></tr>
     </table>
   </div>
 </div>
 
+</div><!-- /overview -->
+
+
+<!-- ==================== TRENDS ==================== -->
+<div id="tab-trends" class="tab-panel">
+
+<div class="page-header">
+  <h2>Temporal Trends</h2>
+  <p>Annual &amp; monthly BSI counts with antimicrobial resistance proportion</p>
 </div>
 
-<!-- ============================================================ -->
-<!-- TAB 2: TRENDS -->
-<!-- ============================================================ -->
-<div id="tab-trends" class="tab-content">
-
-<div class="grid grid-2">
+<div class="grid g2">
   <div class="card">
-    <h3>Annual BSI Cases (Resistant vs Non-Resistant)</h3>
-    <div class="chart-container">
-      <canvas id="chartAnnual"></canvas>
-    </div>
+    <div class="card-title">Annual Cases &mdash; Resistant vs Non-Resistant</div>
+    <div class="chart-box h280"><canvas id="chartAnnual"></canvas></div>
   </div>
   <div class="card">
-    <h3>Annual Summary</h3>
+    <div class="card-title">Annual Summary</div>
     <table>
-      <tr><th>Year</th><th class="num">Total</th><th class="num">Resistant</th><th class="num">% Resistant</th></tr>
+      <tr><th>Year</th><th class="num">Total</th><th class="num">Resistant</th><th class="num">%</th></tr>
       <tr><td>2017</td><td class="num">112,890</td><td class="num">7,630</td><td class="num">6.8%</td></tr>
       <tr><td>2018</td><td class="num">106,405</td><td class="num">7,745</td><td class="num">7.3%</td></tr>
       <tr><td>2019</td><td class="num">95,835</td><td class="num">7,065</td><td class="num">7.4%</td></tr>
@@ -180,405 +500,379 @@ OpenSAFELY-TPP · 2017–2025 · Last updated: April 2026</div>
       <tr><td>2022</td><td class="num">77,755</td><td class="num">6,010</td><td class="num">7.7%</td></tr>
       <tr><td>2023</td><td class="num">77,475</td><td class="num">6,210</td><td class="num">8.0%</td></tr>
       <tr><td>2024</td><td class="num">73,970</td><td class="num">6,495</td><td class="num">8.8%</td></tr>
-      <tr><td>2025*</td><td class="num">33,910</td><td class="num">3,030</td><td class="num">8.9%</td></tr>
+      <tr><td style="color:var(--light)">2025*</td><td class="num">33,910</td><td class="num">3,030</td><td class="num">8.9%</td></tr>
     </table>
-    <div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">* 2025 data to June only. All counts rounded to nearest 5.</div>
+    <p style="font-size:0.72rem;color:var(--light);margin-top:10px">* 2025 data to June only. All counts rounded to nearest 5.</p>
   </div>
 </div>
 
-<div class="card" style="margin-bottom:24px">
-  <h3>Monthly BSI Count &amp; % Resistant (Jan 2017 – Jun 2025)</h3>
-  <div class="chart-container-tall">
-    <canvas id="chartMonthly"></canvas>
+<div class="card" style="margin-bottom:var(--gap)">
+  <div class="card-title">Monthly BSI Count &amp; % Resistant (Jan 2017 &ndash; Jun 2025)</div>
+  <div class="chart-box h320"><canvas id="chartMonthly"></canvas></div>
+</div>
+
+<div class="card">
+  <div class="card-title">Resistant BSI Proportion &mdash; Rising Trend</div>
+  <div class="chart-box h200"><canvas id="chartPctResistant"></canvas></div>
+</div>
+
+</div><!-- /trends -->
+
+
+<!-- ==================== DEMOGRAPHICS ==================== -->
+<div id="tab-demographics" class="tab-panel">
+
+<div class="page-header">
+  <h2>Demographics &amp; Comorbidities</h2>
+  <p>Patient characteristics of the BSI cohort (N = 724,625)</p>
+</div>
+
+<div class="grid g3">
+  <div class="card">
+    <div class="card-title">Age Distribution</div>
+    <table>
+      <tr><th>Band</th><th class="num">N</th><th class="num">%</th></tr>
+      <tr><td>0&ndash;17</td><td class="num">13,995</td><td class="num">1.9%</td></tr>
+      <tr><td>18&ndash;29</td><td class="num">28,690</td><td class="num">4.0%</td></tr>
+      <tr><td>30&ndash;39</td><td class="num">35,815</td><td class="num">4.9%</td></tr>
+      <tr><td>40&ndash;49</td><td class="num">41,310</td><td class="num">5.7%</td></tr>
+      <tr><td>50&ndash;59</td><td class="num">73,845</td><td class="num">10.2%</td></tr>
+      <tr><td>60&ndash;69</td><td class="num">113,200</td><td class="num">15.6%</td></tr>
+      <tr><td>70&ndash;79</td><td class="num">173,605</td><td class="num">24.0%</td></tr>
+      <tr><td style="font-weight:600">80+</td><td class="num" style="font-weight:600">244,160</td><td class="num" style="font-weight:600">33.7%</td></tr>
+    </table>
+    <p style="font-size:0.78rem;color:var(--muted);margin-top:10px">Median: 73 (IQR 58&ndash;83)</p>
+  </div>
+  <div class="card">
+    <div class="card-title">Ethnicity (6 Groups)</div>
+    <div class="chart-box h250"><canvas id="chartEthnicity"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Region (TPP Coverage)</div>
+    <div class="chart-box h250"><canvas id="chartRegion"></canvas></div>
+  </div>
+</div>
+
+<div class="grid g-31">
+  <div class="card">
+    <div class="card-title">Comorbidity Prevalence (%)</div>
+    <div class="chart-box h400"><canvas id="chartComorb"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title">Key Clinical Features</div>
+
+    <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--primary);margin-bottom:8px">Multimorbidity</p>
+    <table>
+      <tr><td>0 conditions</td><td class="num">28,955 (4.0%)</td></tr>
+      <tr><td>1 condition</td><td class="num">85,745 (11.8%)</td></tr>
+      <tr><td>2 conditions</td><td class="num">164,100 (22.6%)</td></tr>
+      <tr><td style="font-weight:600;color:var(--amber)">3+ conditions</td><td class="num" style="font-weight:600;color:var(--amber)">445,820 (61.5%)</td></tr>
+    </table>
+
+    <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--primary);margin:16px 0 8px">Inequality Markers</p>
+    <table>
+      <tr><td>Migration code</td><td class="num">33,210 (4.6%)</td></tr>
+      <tr><td>English proficiency code</td><td class="num">27,520 (3.8%)</td></tr>
+    </table>
+
+    <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--primary);margin:16px 0 8px">IMD Quintile</p>
+    <table>
+      <tr><td>Q2</td><td class="num">145,620 (20.1%)</td></tr>
+      <tr><td>Q3</td><td class="num">153,830 (21.2%)</td></tr>
+      <tr><td>Q4</td><td class="num">138,415 (19.1%)</td></tr>
+      <tr><td style="color:var(--red)">Missing</td><td class="num" style="color:var(--red)">286,760 (39.6%)</td></tr>
+    </table>
+    <p style="font-size:0.72rem;color:var(--light);margin-top:8px">IMD bug fixed in Round 2 code &mdash; expect 5 quintiles.</p>
+
+    <p style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.05em;color:var(--primary);margin:16px 0 8px">COVID-19 Before BSI</p>
+    <table>
+      <tr><td>Any source</td><td class="num">112,565 (15.5%)</td></tr>
+      <tr><td>SGSS test</td><td class="num">85,250 (11.8%)</td></tr>
+      <tr><td>Primary care</td><td class="num">67,030 (9.3%)</td></tr>
+      <tr><td>Hospital</td><td class="num">59,825 (8.3%)</td></tr>
+    </table>
+  </div>
+</div>
+
+</div><!-- /demographics -->
+
+
+<!-- ==================== CHANGES & FIXES ==================== -->
+<div id="tab-changes" class="tab-panel">
+
+<div class="page-header">
+  <h2>Changes &amp; Fixes</h2>
+  <p>Issues identified from Round 1 and improvements implemented for Round 2</p>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <div class="card-title" style="color:var(--red)">Concerns from Round 1</div>
+    <div class="item-list">
+      <div class="item item-concern"><strong>IMD 39.6% missing</strong> &mdash; Label parsing broke <code>as.integer()</code>. Only quintiles 2&ndash;4 visible. <span class="pill pill-green">Fixed</span></div>
+      <div class="item item-concern"><strong>Immunosuppression (medication) = 0%</strong> &mdash; DMD codes queried against SNOMED field. <span class="pill pill-green">Removed</span></div>
+      <div class="item item-concern"><strong>Registration fixed to 2017-01-01</strong> &mdash; Late-arriving patients excluded incorrectly. <span class="pill pill-green">Fixed</span></div>
+      <div class="item item-concern"><strong>Antibiotic window overlap</strong> &mdash; Prior-month &amp; prior-year overlapped; index date included. <span class="pill pill-green">Redesigned</span></div>
+      <div class="item item-concern"><strong>AMR &plusmn;30d window too wide</strong> &mdash; May capture unrelated episodes. <span class="pill pill-green">&plusmn;14d</span></div>
+      <div class="item item-concern"><strong>Missing risk factors vs CPRD</strong> &mdash; 27 of 60 conditions from van Staa 2024. <span class="pill pill-green">39 now</span></div>
+      <div class="item item-concern"><strong>No primary care BSI</strong> &mdash; Community-managed episodes missed. <span class="pill pill-green">Added</span></div>
+      <div class="item item-concern"><strong>No incidence rates</strong> &mdash; Raw counts, no denominators. <span class="pill pill-green">Measures added</span></div>
+      <div class="item item-concern"><strong>No control cohort</strong> &mdash; Cannot study risk for BSI. <span class="pill pill-green">Created</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title" style="color:var(--green)">Implemented for Round 2</div>
+    <div class="item-list">
+      <div class="item item-fix"><strong>IMD &rarr; built-in <code>.imd_quintile</code></strong> &mdash; Integer 1&ndash;5, no label parsing.</div>
+      <div class="item item-fix"><strong>Registration &rarr; rolling</strong> &mdash; &ge;1yr before each patient's index date.</div>
+      <div class="item item-fix"><strong>4 antibiotic variables</strong> &mdash; Non-overlapping windows: abx_6w, abx_prior_year_cat, abx_classes_6w, abx_classes_prior_year. Index date excluded.</div>
+      <div class="item item-fix"><strong>AMR window &plusmn;14 days</strong> &mdash; Matches culture turnaround + GP coding delay.</div>
+      <div class="item item-fix"><strong>+12 comorbidities</strong> &mdash; Frailty (eFI), housebound, PVD, VTE, organ transplant, IBD, RA, Parkinson's, HIV, osteoporosis, hypothyroidism.</div>
+      <div class="item item-fix"><strong>12 antibiotic class sub-codelists</strong> &mdash; 3,663 DMD codes classified into penicillins, cephalosporins, macrolides, etc.</div>
+      <div class="item item-fix"><strong>Combined dataset</strong> &mdash; ICD-10 + SNOMED primary care BSI with source classification.</div>
+      <div class="item item-fix"><strong>Measures framework</strong> &mdash; 7 monthly rate measures (overall, resistant, by IMD/region/age/sex). 108 intervals.</div>
+      <div class="item item-fix"><strong>Control cohort</strong> &mdash; No-BSI population pool with 39 comorbidities for 1:6 osmatching.</div>
+    </div>
+  </div>
+</div>
+
+<div class="card" style="margin-top: var(--gap)">
+  <div class="card-title">Antibiotic Exposure Variables (New Design)</div>
+  <table>
+    <tr><th>Variable</th><th>Window</th><th>Type</th><th>Description</th></tr>
+    <tr><td><code>abx_6w</code></td><td>index &minus; 42d to index &minus; 1d</td><td><span class="pill pill-primary">Yes / No</span></td><td>Any antibiotic in 6 weeks before BSI</td></tr>
+    <tr><td><code>abx_prior_year_cat</code></td><td>index &minus; 42d &minus; 1yr to index &minus; 43d</td><td><span class="pill pill-primary">0/1/2-3/4+</span></td><td>Prescription count in the year before the 6-week window</td></tr>
+    <tr><td><code>abx_classes_6w</code></td><td>index &minus; 42d to index &minus; 1d</td><td><span class="pill pill-primary">Count</span></td><td>Distinct antibiotic classes in 6 weeks</td></tr>
+    <tr><td><code>abx_classes_prior_year</code></td><td>index &minus; 42d &minus; 1yr to index &minus; 43d</td><td><span class="pill pill-primary">Count</span></td><td>Distinct antibiotic classes in prior year</td></tr>
+  </table>
+</div>
+
+</div><!-- /changes -->
+
+
+<!-- ==================== PIPELINE ==================== -->
+<div id="tab-pipeline" class="tab-panel">
+
+<div class="page-header">
+  <h2>Pipeline &amp; Next Steps</h2>
+  <p>OpenSAFELY pipeline status and planned analysis phases</p>
+</div>
+
+<div class="grid g2">
+  <div class="card">
+    <div class="card-title">Pipeline Actions (project.yaml)</div>
+    <div class="pipeline">
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-done"></span><span class="pipe-name">generate_dataset</span><span class="pill pill-green">Done</span><span class="pipe-desc">Hospital ICD-10 BSI</span></div>
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-done"></span><span class="pipe-name">sepsis_trend_analysis</span><span class="pill pill-green">Done</span><span class="pipe-desc">Monthly &amp; annual counts</span></div>
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-done"></span><span class="pipe-name">descriptive_analysis</span><span class="pill pill-green">Done</span><span class="pipe-desc">Table 1 + 7 figures</span></div>
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-pending"></span><span class="pipe-name">generate_dataset_combined</span><span class="pill pill-amber">Re-run</span><span class="pipe-desc">ICD-10 + SNOMED</span></div>
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-pending"></span><span class="pipe-name">descriptive_analysis_combined</span><span class="pill pill-amber">Re-run</span><span class="pipe-desc">Combined Table 1 + 9 figs</span></div>
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-new"></span><span class="pipe-name">generate_measures</span><span class="pill pill-blue">New</span><span class="pipe-desc">7 monthly rate measures</span></div>
+      <div class="pipe-step"><span class="pipe-dot pipe-dot-new"></span><span class="pipe-name">generate_controls</span><span class="pill pill-blue">New</span><span class="pipe-desc">No-BSI population pool</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="card-title">Expected Round 2 Outputs</div>
+    <div class="item-list">
+      <div class="item item-next"><strong>Updated hospital-only descriptive</strong> &mdash; Table 1 with 39 comorbidities, 4 antibiotic vars, frailty, smoking, care home, rural/urban. IMD 5 quintiles.</div>
+      <div class="item item-next"><strong>Combined descriptive</strong> &mdash; Hospital + primary care BSI. Source breakdown. Expect larger total N.</div>
+      <div class="item item-next"><strong>Monthly incidence rates</strong> &mdash; Population-based rates by IMD, region, age, sex. 108 intervals.</div>
+      <div class="item item-next"><strong>Control cohort</strong> &mdash; No-BSI population with 39 comorbidities. Ready for 1:6 matching.</div>
+    </div>
   </div>
 </div>
 
 <div class="card">
-  <h3>% Resistant by Year — Rising Trend</h3>
-  <div class="chart-container" style="height:200px">
-    <canvas id="chartPctResistant"></canvas>
-  </div>
-</div>
-
-</div>
-
-<!-- ============================================================ -->
-<!-- TAB 3: DEMOGRAPHICS & COMORBIDITIES -->
-<!-- ============================================================ -->
-<div id="tab-demographics" class="tab-content">
-
-<div class="grid grid-3">
-  <div class="card">
-    <h3>Age Distribution</h3>
-    <table>
-      <tr><th>Age Band</th><th class="num">N</th><th class="num">%</th></tr>
-      <tr><td>0–17</td><td class="num">13,995</td><td class="num">1.9%</td></tr>
-      <tr><td>18–29</td><td class="num">28,690</td><td class="num">4.0%</td></tr>
-      <tr><td>30–39</td><td class="num">35,815</td><td class="num">4.9%</td></tr>
-      <tr><td>40–49</td><td class="num">41,310</td><td class="num">5.7%</td></tr>
-      <tr><td>50–59</td><td class="num">73,845</td><td class="num">10.2%</td></tr>
-      <tr><td>60–69</td><td class="num">113,200</td><td class="num">15.6%</td></tr>
-      <tr><td>70–79</td><td class="num">173,605</td><td class="num">24.0%</td></tr>
-      <tr><td>80+</td><td class="num">244,160</td><td class="num">33.7%</td></tr>
-    </table>
-    <div style="margin-top:8px;font-size:0.8rem;color:var(--muted)">Median: 73 (IQR 58–83)</div>
-  </div>
-
-  <div class="card">
-    <h3>Ethnicity (6 Groups)</h3>
-    <div class="chart-container" style="height:240px">
-      <canvas id="chartEthnicity"></canvas>
-    </div>
-  </div>
-
-  <div class="card">
-    <h3>Region (TPP Coverage)</h3>
-    <div class="chart-container" style="height:240px">
-      <canvas id="chartRegion"></canvas>
-    </div>
-  </div>
-</div>
-
-<div class="grid grid-2">
-  <div class="card">
-    <h3>Comorbidity Prevalence (%)</h3>
-    <div class="chart-container" style="height:500px">
-      <canvas id="chartComorb"></canvas>
-    </div>
-  </div>
-  <div class="card">
-    <h3>Key Clinical Features</h3>
-    <table>
-      <tr><th>Variable</th><th class="num">N</th><th class="num">%</th></tr>
-      <tr style="font-weight:600"><td colspan="3" style="color:var(--accent);padding-top:12px">Multimorbidity (Bristol Index)</td></tr>
-      <tr><td>0 conditions</td><td class="num">28,955</td><td class="num">4.0%</td></tr>
-      <tr><td>1 condition</td><td class="num">85,745</td><td class="num">11.8%</td></tr>
-      <tr><td>2 conditions</td><td class="num">164,100</td><td class="num">22.6%</td></tr>
-      <tr><td style="color:var(--amber)">3+ conditions</td><td class="num" style="color:var(--amber)">445,820</td><td class="num" style="color:var(--amber)">61.5%</td></tr>
-      <tr style="font-weight:600"><td colspan="3" style="color:var(--accent);padding-top:12px">Inequality Markers</td></tr>
-      <tr><td>Migration code</td><td class="num">33,210</td><td class="num">4.6%</td></tr>
-      <tr><td>Migration code (Yamina)</td><td class="num">33,915</td><td class="num">4.7%</td></tr>
-      <tr><td>English proficiency code</td><td class="num">27,520</td><td class="num">3.8%</td></tr>
-      <tr style="font-weight:600"><td colspan="3" style="color:var(--accent);padding-top:12px">IMD Quintile</td></tr>
-      <tr><td>Quintile 2</td><td class="num">145,620</td><td class="num">20.1%</td></tr>
-      <tr><td>Quintile 3</td><td class="num">153,830</td><td class="num">21.2%</td></tr>
-      <tr><td>Quintile 4</td><td class="num">138,415</td><td class="num">19.1%</td></tr>
-      <tr><td style="color:var(--red)">Missing</td><td class="num" style="color:var(--red)">286,760</td><td class="num" style="color:var(--red)">39.6%</td></tr>
-      <tr style="font-weight:600"><td colspan="3" style="color:var(--accent);padding-top:12px">COVID-19 Before BSI</td></tr>
-      <tr><td>Any COVID</td><td class="num">112,565</td><td class="num">15.5%</td></tr>
-      <tr><td>SGSS positive test</td><td class="num">85,250</td><td class="num">11.8%</td></tr>
-      <tr><td>Primary care code</td><td class="num">67,030</td><td class="num">9.3%</td></tr>
-      <tr><td>Hospital code</td><td class="num">59,825</td><td class="num">8.3%</td></tr>
-    </table>
-    <div style="margin-top:10px;font-size:0.75rem;color:var(--muted)">
-      ⚠️ IMD missing 39.6% — known issue from Round 1, fixed in Round 2 code.<br>
-      ⚠️ Only quintiles 2–4 visible — quintiles 1 &amp; 5 were lost due to label parsing bug.
-    </div>
-  </div>
-</div>
-
-</div>
-
-<!-- ============================================================ -->
-<!-- TAB 4: CHANGES & CONCERNS -->
-<!-- ============================================================ -->
-<div id="tab-changes" class="tab-content">
-
-<div class="section-title">⚠️ Concerns Identified from Round 1</div>
-
-<div class="grid grid-2">
-  <div class="card">
-    <h3 style="color:var(--red)">Data Quality Issues</h3>
-    <div class="concern-item"><strong>IMD 39.6% missing</strong> — Labels "1 (most deprived)" broke <code>as.integer()</code> in R. Only quintiles 2–4 visible. <span class="badge badge-green">FIXED</span></div>
-    <div class="concern-item"><strong>Immunosuppression (medication) = 0%</strong> — DMD drug codes queried against SNOMED field; zero matches. <span class="badge badge-green">REMOVED</span></div>
-    <div class="concern-item"><strong>Registration date fixed to 2017-01-01</strong> — All patients required registration before study start, not before their index date. <span class="badge badge-green">FIXED</span></div>
-  </div>
-  <div class="card">
-    <h3 style="color:var(--red)">Methodological Issues</h3>
-    <div class="concern-item"><strong>Antibiotic window overlap</strong> — Prior-month and prior-year windows overlapped; index date counted as exposure. <span class="badge badge-green">REDESIGNED</span></div>
-    <div class="concern-item"><strong>AMR ±30d window too wide</strong> — May capture unrelated episodes. <span class="badge badge-green">NARROWED TO ±14d</span></div>
-    <div class="concern-item"><strong>Missing risk factors vs CPRD</strong> — Only 27 of 60 conditions from van Staa 2024. <span class="badge badge-green">EXPANDED TO 39</span></div>
-    <div class="concern-item"><strong>No primary care BSI</strong> — Community-managed episodes missed. <span class="badge badge-green">COMBINED DATASET ADDED</span></div>
-    <div class="concern-item"><strong>No incidence rates</strong> — Raw counts only, no population denominators. <span class="badge badge-green">MEASURES ADDED</span></div>
-    <div class="concern-item"><strong>No control cohort</strong> — Cannot answer "who develops BSI?" <span class="badge badge-green">CONTROLS ADDED</span></div>
-  </div>
-</div>
-
-<div class="section-title" style="margin-top:24px">✅ Changes Implemented for Round 2</div>
-
-<div class="grid grid-2">
-  <div class="card">
-    <h3 style="color:var(--green)">Data Fixes</h3>
-    <div class="fix-item"><strong>IMD → built-in <code>.imd_quintile</code></strong> — Integer 1–5, no label parsing. Expect 5 quintiles with minimal missingness.</div>
-    <div class="fix-item"><strong>Registration → rolling</strong> — Now requires ≥1yr before each patient's own index date (not study start).</div>
-    <div class="fix-item"><strong>Immunosuppression (medication) deleted</strong> — Diagnosis-based variable retained (9.8%).</div>
-  </div>
-  <div class="card">
-    <h3 style="color:var(--green)">Methodological Improvements</h3>
-    <div class="fix-item"><strong>Antibiotic windows redesigned</strong> — 4 non-overlapping variables: abx_6w, abx_prior_year_cat, abx_classes_6w, abx_classes_prior_year. Index date excluded.</div>
-    <div class="fix-item"><strong>AMR window ±14 days</strong> — Matches blood culture turnaround + GP coding delay.</div>
-    <div class="fix-item"><strong>+12 comorbidities</strong> — Frailty (eFI), housebound, PVD, VTE, organ transplant, IBD, RA, Parkinson's, HIV, osteoporosis, hypothyroidism.</div>
-    <div class="fix-item"><strong>12 antibiotic classes</strong> — 3,663 DMD codes classified: penicillins, cephalosporins, macrolides, fluoroquinolones, tetracyclines, aminoglycosides, carbapenems, glycopeptides, nitroimidazoles, sulfonamides/trimethoprim, nitrofurantoin, other.</div>
-  </div>
-</div>
-
-<div class="grid grid-2">
-  <div class="card">
-    <h3 style="color:var(--green)">New Datasets</h3>
-    <div class="fix-item"><strong>Combined dataset</strong> — Hospital ICD-10 + primary care SNOMED BSI. Source classification: hospital_only / primary_care_only / both.</div>
-    <div class="fix-item"><strong>Measures framework</strong> — Monthly BSI rates per registered population. 7 measures: overall, resistant, by IMD, by region, by age, by sex. 108 monthly intervals.</div>
-    <div class="fix-item"><strong>Control cohort</strong> — No-BSI population pool. Same 39 comorbidities extracted. Ready for 1:6 osmatching.</div>
-  </div>
-  <div class="card">
-    <h3>Antibiotic Exposure Variables (New Design)</h3>
-    <table>
-      <tr><th>Variable</th><th>Window</th><th>Type</th></tr>
-      <tr><td><code>abx_6w</code></td><td>[index−42d, index−1d]</td><td>Yes/No</td></tr>
-      <tr><td><code>abx_prior_year_cat</code></td><td>[index−42d−1yr, index−43d]</td><td>0/1/2-3/4+</td></tr>
-      <tr><td><code>abx_classes_6w</code></td><td>[index−42d, index−1d]</td><td>Count of distinct classes</td></tr>
-      <tr><td><code>abx_classes_prior_year</code></td><td>[index−42d−1yr, index−43d]</td><td>Count of distinct classes</td></tr>
-    </table>
-    <div style="margin-top:8px;font-size:0.75rem;color:var(--muted)">Windows are non-overlapping. Index date excluded (treatment ≠ prior exposure).</div>
-  </div>
-</div>
-
-</div>
-
-<!-- ============================================================ -->
-<!-- TAB 5: PIPELINE & NEXT STEPS -->
-<!-- ============================================================ -->
-<div id="tab-pipeline" class="tab-content">
-
-<div class="grid grid-2">
-  <div class="card">
-    <h3>OpenSAFELY Pipeline (project.yaml)</h3>
-    <div class="pipeline-step"><span class="pipeline-status status-done"></span><strong>generate_dataset</strong> <span class="tag">hospital ICD-10 BSI</span> <span class="badge badge-green">DONE ✓</span></div>
-    <div class="pipeline-step"><span class="pipeline-status status-done"></span><strong>sepsis_trend_analysis</strong> <span class="tag">monthly + annual counts</span> <span class="badge badge-green">DONE ✓</span></div>
-    <div class="pipeline-step"><span class="pipeline-status status-done"></span><strong>descriptive_analysis</strong> <span class="tag">Table 1 + 7 figures</span> <span class="badge badge-green">DONE ✓</span></div>
-    <div class="pipeline-step"><span class="pipeline-status status-pending"></span><strong>generate_dataset_combined</strong> <span class="tag">ICD-10 + SNOMED</span> <span class="badge badge-amber">UPDATED — RE-RUN</span></div>
-    <div class="pipeline-step"><span class="pipeline-status status-pending"></span><strong>descriptive_analysis_combined</strong> <span class="tag">combined Table 1 + 9 figs</span> <span class="badge badge-amber">UPDATED — RE-RUN</span></div>
-    <div class="pipeline-step"><span class="pipeline-status status-new"></span><strong>generate_measures</strong> <span class="tag">7 monthly rate measures</span> <span class="badge badge-blue">NEW</span></div>
-    <div class="pipeline-step"><span class="pipeline-status status-new"></span><strong>generate_controls</strong> <span class="tag">no-BSI population</span> <span class="badge badge-blue">NEW</span></div>
-  </div>
-
-  <div class="card">
-    <h3>Expected Round 2 Outputs</h3>
-    <div class="next-item"><strong>Hospital-only descriptive (updated)</strong> — Table 1 with 39 comorbidities, 4 antibiotic vars, frailty, smoking, care home, rural/urban. IMD 5 quintiles.</div>
-    <div class="next-item"><strong>Combined descriptive</strong> — Hospital + primary care BSI. Source breakdown. Expect larger total N.</div>
-    <div class="next-item"><strong>Monthly incidence rates</strong> — Population-based rates by IMD, region, age, sex. 108 intervals (Jan 2017 – Dec 2025).</div>
-    <div class="next-item"><strong>Control cohort</strong> — No-BSI population with 39 comorbidities. Ready for 1:6 matching.</div>
-  </div>
-</div>
-
-<div class="card" style="margin-bottom:24px">
-  <h3>Planned Analysis Phases</h3>
+  <div class="card-title">Planned Analysis Phases</div>
   <table>
     <tr><th>Phase</th><th>Description</th><th>Status</th></tr>
-    <tr><td><strong>Phase 1</strong></td><td>Descriptive analysis: BSI cohort characteristics, trends, mortality</td><td><span class="badge badge-green">Round 1 complete</span></td></tr>
-    <tr><td><strong>Phase 2</strong></td><td>Updated descriptive with fixes + combined dataset + measures + controls</td><td><span class="badge badge-amber">Round 2 pending</span></td></tr>
-    <tr><td><strong>Phase 3</strong></td><td>Case-control matching: resistant BSI cases vs no-BSI population (1:6 osmatching)</td><td><span class="badge badge-blue">Planned</span></td></tr>
-    <tr><td><strong>Phase 4</strong></td><td>Conditional logistic regression: risk factors for resistant BSI vs no-BSI</td><td><span class="badge badge-blue">Planned</span></td></tr>
-    <tr><td><strong>Phase 5</strong></td><td>Step 2: Among BSI patients, resistant vs non-resistant comparison</td><td><span class="badge badge-blue">Planned</span></td></tr>
-    <tr><td><strong>Phase 6</strong></td><td>Interrupted time series around COVID periods</td><td><span class="badge badge-blue">Planned</span></td></tr>
-    <tr><td><strong>Phase 7</strong></td><td>Cox survival analysis: mortality (30d/90d/365d) by AMR status</td><td><span class="badge badge-blue">Planned</span></td></tr>
-    <tr><td><strong>Phase 8</strong></td><td>Sensitivity analyses: AMR windows (7d/14d/30d); hospital-only vs combined</td><td><span class="badge badge-blue">Planned</span></td></tr>
+    <tr><td style="font-weight:600">1</td><td>Descriptive: BSI cohort characteristics, trends, mortality</td><td><span class="pill pill-green">Round 1 complete</span></td></tr>
+    <tr><td style="font-weight:600">2</td><td>Updated descriptive + combined + measures + controls</td><td><span class="pill pill-amber">Round 2 pending</span></td></tr>
+    <tr><td style="font-weight:600">3</td><td>Case-control matching: resistant BSI vs no-BSI (1:6 osmatching)</td><td><span class="pill pill-blue">Planned</span></td></tr>
+    <tr><td style="font-weight:600">4</td><td>Conditional logistic regression: risk factors for resistant BSI</td><td><span class="pill pill-blue">Planned</span></td></tr>
+    <tr><td style="font-weight:600">5</td><td>Among BSI: resistant vs non-resistant comparison</td><td><span class="pill pill-blue">Planned</span></td></tr>
+    <tr><td style="font-weight:600">6</td><td>Interrupted time series around COVID periods</td><td><span class="pill pill-blue">Planned</span></td></tr>
+    <tr><td style="font-weight:600">7</td><td>Cox survival: mortality (30d/90d/365d) by AMR status</td><td><span class="pill pill-blue">Planned</span></td></tr>
+    <tr><td style="font-weight:600">8</td><td>Sensitivity: AMR windows (7d/14d/30d); hospital vs combined</td><td><span class="pill pill-blue">Planned</span></td></tr>
   </table>
 </div>
 
-</div>
+</div><!-- /pipeline -->
 
 
-<!-- ============================================================ -->
-<!-- FOOTER -->
-<!-- ============================================================ -->
-<div style="text-align:center; color:var(--muted); font-size:0.75rem; margin-top:32px; padding-bottom:16px;">
-  IDAIRE-BSI OpenSAFELY Study · All counts rounded per OpenSAFELY SDC policy (nearest 5, cells 1–7 redacted)<br>
-  Dashboard source: <a href="https://github.com/BillyZhongUOM/idaire-bsi-dashboard" style="color:var(--accent)">github.com/BillyZhongUOM/idaire-bsi-dashboard</a>
-</div>
+</div><!-- /main -->
+</div><!-- /shell -->
 
 
 <!-- ============================================================ -->
 <!-- CHARTS -->
 <!-- ============================================================ -->
 <script>
-// Tab switching
-function switchTab(name) {
-  document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(el => el.classList.remove('active'));
+/* ---- Navigation ---- */
+function go(name) {
+  document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
-  event.target.classList.add('active');
-  // Re-render charts for visible tab
-  setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+  event.currentTarget.classList.add('active');
+  setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
 }
 
-// Chart defaults
-Chart.defaults.color = '#94a3b8';
-Chart.defaults.borderColor = 'rgba(51,65,85,0.5)';
+/* ---- Chart Defaults ---- */
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#9CA3AF';
+Chart.defaults.borderColor = '#F3F4F6';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.padding = 16;
+Chart.defaults.scale.grid = { color: '#F3F4F6', drawBorder: false };
 
-// --- Mortality by period ---
+const indigo = '#5E5ADB';
+const indigoAlpha = 'rgba(94,90,219,0.12)';
+const red = '#DC2626';
+const redAlpha = 'rgba(220,38,38,0.10)';
+const amber = '#D97706';
+const amberAlpha = 'rgba(217,119,6,0.10)';
+const blue = '#2563EB';
+const blueAlpha = 'rgba(37,99,235,0.10)';
+const green = '#16A34A';
+
+/* ---- Mortality ---- */
 new Chart(document.getElementById('chartMortality'), {
   type: 'bar',
   data: {
     labels: ['Pre-COVID','During COVID','Post-COVID'],
     datasets: [
-      { label:'30-day', data:[17.4,20.8,18.7], backgroundColor:'rgba(248,113,113,0.7)', borderRadius:3 },
-      { label:'90-day', data:[25.0,28.9,26.3], backgroundColor:'rgba(251,191,36,0.7)', borderRadius:3 },
-      { label:'365-day', data:[35.6,38.6,35.7], backgroundColor:'rgba(96,165,250,0.7)', borderRadius:3 },
+      { label:'30-day', data:[17.4,20.8,18.7], backgroundColor:'rgba(220,38,38,0.65)', borderRadius:6 },
+      { label:'90-day', data:[25.0,28.9,26.3], backgroundColor:'rgba(217,119,6,0.65)', borderRadius:6 },
+      { label:'365-day', data:[35.6,38.6,35.7], backgroundColor:'rgba(94,90,219,0.55)', borderRadius:6 },
     ]
   },
   options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { font:{size:10} } } },
+    responsive:true, maintainAspectRatio:false,
+    plugins: { legend: { labels:{font:{size:11}} } },
     scales: {
-      x: { grid: { display:false } },
-      y: { ticks: { callback: v=>v+'%' }, max:45 }
+      x: { grid:{display:false} },
+      y: { ticks:{callback:v=>v+'%'}, max:45, grid:{color:'#F3F4F6'} }
     }
   }
 });
 
-// --- Annual BSI ---
+/* ---- Annual ---- */
 new Chart(document.getElementById('chartAnnual'), {
   type: 'bar',
   data: {
     labels: ['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
-    datasets: [{
-      label: 'Non-resistant',
-      data: [105260,98655,88770,64995,69530,71745,71265,67480,30880],
-      backgroundColor: 'rgba(96,165,250,0.7)',
-      borderRadius: 2,
-    },{
-      label: 'Resistant',
-      data: [7630,7745,7065,5665,6190,6010,6210,6495,3030],
-      backgroundColor: 'rgba(248,113,113,0.8)',
-      borderRadius: 2,
-    }]
+    datasets: [
+      { label:'Non-resistant', data:[105260,98655,88770,64995,69530,71745,71265,67480,30880], backgroundColor:'rgba(94,90,219,0.55)', borderRadius:4 },
+      { label:'Resistant', data:[7630,7745,7065,5665,6190,6010,6210,6495,3030], backgroundColor:'rgba(220,38,38,0.65)', borderRadius:4 },
+    ]
   },
   options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { font:{size:11} } } },
+    responsive:true, maintainAspectRatio:false,
+    plugins: { legend:{labels:{font:{size:11}}} },
     scales: {
-      x: { stacked: true },
-      y: { stacked: true, ticks: { callback: v => (v/1000)+'k' } }
+      x: { stacked:true, grid:{display:false} },
+      y: { stacked:true, ticks:{callback:v=>(v/1000)+'k'} }
     }
   }
 });
 
-// --- Monthly BSI ---
-const monthlyTotal = [7780,7030,8170,9865,10325,9965,10255,9980,9485,9865,9725,10445,10440,9200,9670,8665,8815,8375,8970,8905,8210,8495,8240,8420,8785,7765,8090,8080,8085,7595,8270,8085,7740,7795,7545,7995,7350,6530,5500,4335,4730,5135,5795,6445,6160,6475,5975,6230,6330,5420,6040,6120,6480,6460,6660,6580,6400,6425,6330,6475,6160,5780,6460,6175,6525,6375,6710,6475,6425,6730,6475,7470,6610,5785,6505,6225,6495,6565,6635,6675,6420,6560,6355,6655,6455,5890,6165,6045,6410,6030,6115,6265,6010,6385,5980,6210,6035,5255,5855,5435,5590,5740];
-const monthlyRes = [515,465,555,650,700,740,700,705,680,710,630,580,640,615,645,730,650,665,665,645,605,645,625,615,620,500,620,610,675,570,635,605,560,590,530,540,485,500,420,360,425,425,520,510,495,520,485,520,525,460,520,560,495,525,540,530,505,505,495,530,480,445,500,460,515,470,540,580,525,505,480,510,500,435,475,485,525,570,595,530,550,570,500,475,510,480,540,560,570,530,540,580,575,540,535,530,510,450,505,510,530,530];
-const mLabels = [];
-for(let y=2017;y<=2025;y++){const mx=y===2025?6:12;for(let m=1;m<=mx;m++) mLabels.push(y+'-'+(m<10?'0':'')+m);}
-const mPct = monthlyTotal.map((v,i)=>((monthlyRes[i]/v)*100).toFixed(1));
+/* ---- Monthly ---- */
+const mt=[7780,7030,8170,9865,10325,9965,10255,9980,9485,9865,9725,10445,10440,9200,9670,8665,8815,8375,8970,8905,8210,8495,8240,8420,8785,7765,8090,8080,8085,7595,8270,8085,7740,7795,7545,7995,7350,6530,5500,4335,4730,5135,5795,6445,6160,6475,5975,6230,6330,5420,6040,6120,6480,6460,6660,6580,6400,6425,6330,6475,6160,5780,6460,6175,6525,6375,6710,6475,6425,6730,6475,7470,6610,5785,6505,6225,6495,6565,6635,6675,6420,6560,6355,6655,6455,5890,6165,6045,6410,6030,6115,6265,6010,6385,5980,6210,6035,5255,5855,5435,5590,5740];
+const mr=[515,465,555,650,700,740,700,705,680,710,630,580,640,615,645,730,650,665,665,645,605,645,625,615,620,500,620,610,675,570,635,605,560,590,530,540,485,500,420,360,425,425,520,510,495,520,485,520,525,460,520,560,495,525,540,530,505,505,495,530,480,445,500,460,515,470,540,580,525,505,480,510,500,435,475,485,525,570,595,530,550,570,500,475,510,480,540,560,570,530,540,580,575,540,535,530,510,450,505,510,530,530];
+const ml=[];for(let y=2017;y<=2025;y++){const mx=y===2025?6:12;for(let m=1;m<=mx;m++)ml.push(y+'-'+(m<10?'0':'')+m);}
+const mp=mt.map((v,i)=>((mr[i]/v)*100).toFixed(1));
 
 new Chart(document.getElementById('chartMonthly'), {
   type: 'line',
   data: {
-    labels: mLabels,
+    labels: ml,
     datasets: [{
-      label: 'Total BSI',
-      data: monthlyTotal,
-      borderColor: 'rgba(96,165,250,0.9)',
-      backgroundColor: 'rgba(96,165,250,0.1)',
-      fill: true, tension: 0.3, pointRadius: 0, yAxisID: 'y',
+      label:'Total BSI', data:mt,
+      borderColor:indigo, backgroundColor:indigoAlpha, fill:true,
+      tension:0.35, pointRadius:0, borderWidth:2, yAxisID:'y',
     },{
-      label: '% Resistant',
-      data: mPct,
-      borderColor: 'rgba(248,113,113,0.9)',
-      borderDash: [4,3], tension: 0.3, pointRadius: 0, yAxisID: 'y1',
+      label:'% Resistant', data:mp,
+      borderColor:red, borderDash:[5,4], tension:0.35,
+      pointRadius:0, borderWidth:1.5, yAxisID:'y1',
     }]
   },
   options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { labels: { font:{size:10} } } },
+    responsive:true, maintainAspectRatio:false,
+    plugins:{legend:{labels:{font:{size:10}}}},
     scales: {
-      x: { ticks: { maxTicksLimit: 12, font:{size:9} } },
-      y: { position:'left', ticks: { callback: v=>(v/1000)+'k', color:'#60a5fa' } },
-      y1: { position:'right', min:4, max:12, ticks: { callback: v=>v+'%', color:'#f87171' }, grid:{display:false} }
+      x:{ticks:{maxTicksLimit:12,font:{size:9}},grid:{display:false}},
+      y:{position:'left',ticks:{callback:v=>(v/1000)+'k',color:indigo},grid:{color:'#F3F4F6'}},
+      y1:{position:'right',min:4,max:12,ticks:{callback:v=>v+'%',color:red},grid:{display:false}}
     }
   }
 });
 
-// --- % Resistant by year ---
+/* ---- % Resistant ---- */
 new Chart(document.getElementById('chartPctResistant'), {
   type: 'line',
   data: {
-    labels: ['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
-    datasets: [{
-      label: '% Resistant',
-      data: [6.8,7.3,7.4,8.0,8.2,7.7,8.0,8.8,8.9],
-      borderColor: 'var(--red)',
-      backgroundColor: 'rgba(248,113,113,0.15)',
-      fill: true, tension: 0.3, pointRadius: 4,
-      pointBackgroundColor: 'var(--red)',
+    labels:['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
+    datasets:[{
+      label:'% Resistant',data:[6.8,7.3,7.4,8.0,8.2,7.7,8.0,8.8,8.9],
+      borderColor:red,backgroundColor:redAlpha,fill:true,tension:0.35,
+      pointRadius:5,pointBackgroundColor:'#fff',pointBorderColor:red,pointBorderWidth:2,borderWidth:2,
     }]
   },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { display:false } },
-    scales: {
-      y: { min:5, max:10, ticks: { callback: v=>v+'%' } }
-    }
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false}},
+    scales:{y:{min:5,max:10,ticks:{callback:v=>v+'%'}}}
   }
 });
 
-// --- Ethnicity ---
+/* ---- Ethnicity ---- */
 new Chart(document.getElementById('chartEthnicity'), {
   type: 'doughnut',
   data: {
-    labels: ['White (91.9%)','Asian (4.5%)','Black (1.4%)','Chinese/Other (0.8%)','Mixed (0.7%)','Missing (0.7%)'],
-    datasets: [{
-      data: [665945,32760,9950,5840,4765,5365],
-      backgroundColor: ['#60a5fa','#fbbf24','#f472b6','#4ade80','#a78bfa','#475569'],
-    }]
+    labels:['White (91.9%)','Asian (4.5%)','Black (1.4%)','Chinese/Other (0.8%)','Mixed (0.7%)','Missing (0.7%)'],
+    datasets:[{data:[665945,32760,9950,5840,4765,5365],backgroundColor:[indigo,'#D97706','#DB2777','#16A34A','#7C78EA','#D1D5DB'],borderWidth:0}]
   },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    plugins: { legend: { position:'right', labels: { font:{size:9}, boxWidth:10 } } }
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    cutout:'62%',
+    plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}
   }
 });
 
-// --- Region ---
+/* ---- Region ---- */
 new Chart(document.getElementById('chartRegion'), {
   type: 'bar',
   data: {
-    labels: ['East','E.Mid','Yorks','S.West','N.West','S.East','N.East','London','W.Mid','NA'],
-    datasets: [{
-      data: [160115,147210,101355,80525,71160,44255,34080,30020,27980,27925],
-      backgroundColor: 'rgba(167,139,250,0.7)',
-      borderRadius: 3,
-    }]
+    labels:['East','E.Mid','Yorks','S.West','N.West','S.East','N.East','London','W.Mid','NA'],
+    datasets:[{data:[160115,147210,101355,80525,71160,44255,34080,30020,27980,27925],backgroundColor:'rgba(94,90,219,0.55)',borderRadius:6,barPercentage:0.7}]
   },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    indexAxis: 'y',
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { callback: v=>(v/1000)+'k' } },
-      y: { ticks: { font:{size:9} }, grid:{display:false} }
+  options:{
+    responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{callback:v=>(v/1000)+'k'},grid:{color:'#F3F4F6'}},
+      y:{ticks:{font:{size:10}},grid:{display:false}}
     }
   }
 });
 
-// --- Comorbidities ---
-const cLabels = ['CKD (Bristol)','Hypertension','CHD (PRIMIS)','Anxiety/depression','Cancer','CNS disease','Diabetes','CKD 3-5 (PRIMIS)','Hearing loss','Atrial fibrillation','CHD (Bristol)','Resp disease','Asthma','Stroke/TIA','Heart failure','COPD','Connective tissue','Immunosuppression dx','Dementia','IBS','CLD','Chemotherapy','Severe mental illness','Severe obesity','Learning disability','Asplenia'];
-const cValues = [91.5,49.3,44.6,37.5,28.7,27.9,25.5,23.4,21.6,18.3,17.9,17.5,16.0,12.8,12.6,12.0,10.7,9.8,9.5,6.8,5.9,5.9,2.7,1.9,1.5,1.2];
+/* ---- Comorbidities ---- */
+const cL=['CKD','Hypertension','CHD (PRIMIS)','Anxiety/depression','Cancer','CNS disease','Diabetes','CKD 3-5','Hearing loss','Atrial fib','CHD','Resp disease','Asthma','Stroke/TIA','Heart failure','COPD','Connective tissue','Immunosuppression dx','Dementia','IBS','CLD','Chemotherapy','Severe mental illness','Severe obesity','Learning disability','Asplenia'];
+const cV=[91.5,49.3,44.6,37.5,28.7,27.9,25.5,23.4,21.6,18.3,17.9,17.5,16.0,12.8,12.6,12.0,10.7,9.8,9.5,6.8,5.9,5.9,2.7,1.9,1.5,1.2];
 new Chart(document.getElementById('chartComorb'), {
   type: 'bar',
   data: {
-    labels: cLabels,
-    datasets: [{
-      data: cValues,
-      backgroundColor: cValues.map(v => v>40?'rgba(248,113,113,0.7)':v>20?'rgba(251,191,36,0.7)':v>10?'rgba(96,165,250,0.7)':'rgba(74,222,128,0.5)'),
-      borderRadius: 3,
-    }]
+    labels:cL,
+    datasets:[{data:cV,backgroundColor:cV.map(v=>v>40?'rgba(220,38,38,0.55)':v>20?'rgba(217,119,6,0.55)':v>10?'rgba(94,90,219,0.45)':'rgba(22,163,74,0.45)'),borderRadius:6,barPercentage:0.7}]
   },
-  options: {
-    responsive: true, maintainAspectRatio: false,
-    indexAxis: 'y',
-    plugins: { legend: { display: false } },
-    scales: {
-      x: { ticks: { callback: v=>v+'%' }, max:100 },
-      y: { ticks: { font:{size:9} }, grid:{display:false} }
+  options:{
+    responsive:true,maintainAspectRatio:false,indexAxis:'y',
+    plugins:{legend:{display:false}},
+    scales:{
+      x:{ticks:{callback:v=>v+'%'},max:100,grid:{color:'#F3F4F6'}},
+      y:{ticks:{font:{size:9.5}},grid:{display:false}}
     }
   }
 });
