@@ -710,172 +710,154 @@ td code {
 <!-- CHARTS -->
 <!-- ============================================================ -->
 <script>
+/* ============================================================
+   LAZY CHART INIT — only create charts when tab first shown
+   ============================================================ */
+Chart.defaults.font.family = "'Inter', sans-serif";
+Chart.defaults.color = '#9CA3AF';
+Chart.defaults.borderColor = '#F3F4F6';
+Chart.defaults.plugins.legend.labels.boxWidth = 12;
+Chart.defaults.plugins.legend.labels.padding = 16;
+
+const C = {
+  indigo: '#5E5ADB', indigoA: 'rgba(94,90,219,0.12)',
+  red: '#DC2626',    redA: 'rgba(220,38,38,0.10)',
+  amber: '#D97706',  green: '#16A34A',
+};
+
+const initialised = {};
+
+function initTab(name) {
+  if (initialised[name]) return;
+  initialised[name] = true;
+
+  if (name === 'overview') {
+    new Chart(document.getElementById('chartMortality'), {
+      type:'bar',
+      data:{
+        labels:['Pre-COVID','During COVID','Post-COVID'],
+        datasets:[
+          {label:'30-day',data:[17.4,20.8,18.7],backgroundColor:'rgba(220,38,38,0.65)',borderRadius:6},
+          {label:'90-day',data:[25.0,28.9,26.3],backgroundColor:'rgba(217,119,6,0.65)',borderRadius:6},
+          {label:'365-day',data:[35.6,38.6,35.7],backgroundColor:'rgba(94,90,219,0.55)',borderRadius:6},
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{font:{size:11}}}},
+        scales:{x:{grid:{display:false}},y:{ticks:{callback:v=>v+'%'},max:45,grid:{color:'#F3F4F6'}}}
+      }
+    });
+  }
+
+  if (name === 'trends') {
+    /* Annual stacked bar */
+    new Chart(document.getElementById('chartAnnual'), {
+      type:'bar',
+      data:{
+        labels:['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
+        datasets:[
+          {label:'Non-resistant',data:[105260,98655,88770,64995,69530,71745,71265,67480,30880],backgroundColor:'rgba(94,90,219,0.55)',borderRadius:{topLeft:4,topRight:4}},
+          {label:'Resistant',data:[7630,7745,7065,5665,6190,6010,6210,6495,3030],backgroundColor:'rgba(220,38,38,0.70)',borderRadius:{topLeft:4,topRight:4}},
+        ]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{font:{size:11}}}},
+        scales:{
+          x:{stacked:true,grid:{display:false}},
+          y:{stacked:true,ticks:{callback:v=>(v/1000)+'k'},grid:{color:'#F3F4F6'}}
+        }
+      }
+    });
+
+    /* Monthly line (dual axis) */
+    const mt=[7780,7030,8170,9865,10325,9965,10255,9980,9485,9865,9725,10445,10440,9200,9670,8665,8815,8375,8970,8905,8210,8495,8240,8420,8785,7765,8090,8080,8085,7595,8270,8085,7740,7795,7545,7995,7350,6530,5500,4335,4730,5135,5795,6445,6160,6475,5975,6230,6330,5420,6040,6120,6480,6460,6660,6580,6400,6425,6330,6475,6160,5780,6460,6175,6525,6375,6710,6475,6425,6730,6475,7470,6610,5785,6505,6225,6495,6565,6635,6675,6420,6560,6355,6655,6455,5890,6165,6045,6410,6030,6115,6265,6010,6385,5980,6210,6035,5255,5855,5435,5590,5740];
+    const mr=[515,465,555,650,700,740,700,705,680,710,630,580,640,615,645,730,650,665,665,645,605,645,625,615,620,500,620,610,675,570,635,605,560,590,530,540,485,500,420,360,425,425,520,510,495,520,485,520,525,460,520,560,495,525,540,530,505,505,495,530,480,445,500,460,515,470,540,580,525,505,480,510,500,435,475,485,525,570,595,530,550,570,500,475,510,480,540,560,570,530,540,580,575,540,535,530,510,450,505,510,530,530];
+    const ml=[];for(let y=2017;y<=2025;y++){const mx=y===2025?6:12;for(let m=1;m<=mx;m++)ml.push(y+'-'+(m<10?'0':'')+m);}
+    const mp=mt.map((v,i)=>((mr[i]/v)*100).toFixed(1));
+
+    new Chart(document.getElementById('chartMonthly'), {
+      type:'line',
+      data:{labels:ml,datasets:[
+        {label:'Total BSI',data:mt,borderColor:C.indigo,backgroundColor:C.indigoA,fill:true,tension:0.35,pointRadius:0,borderWidth:2,yAxisID:'y'},
+        {label:'% Resistant',data:mp,borderColor:C.red,borderDash:[5,4],tension:0.35,pointRadius:0,borderWidth:1.5,yAxisID:'y1'},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{labels:{font:{size:10}}}},
+        scales:{
+          x:{ticks:{maxTicksLimit:12,font:{size:9}},grid:{display:false}},
+          y:{position:'left',ticks:{callback:v=>(v/1000)+'k',color:C.indigo},grid:{color:'#F3F4F6'}},
+          y1:{position:'right',min:4,max:12,ticks:{callback:v=>v+'%',color:C.red},grid:{display:false}}
+        }
+      }
+    });
+
+    /* % Resistant trend */
+    new Chart(document.getElementById('chartPctResistant'), {
+      type:'line',
+      data:{labels:['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
+        datasets:[{label:'% Resistant',data:[6.8,7.3,7.4,8.0,8.2,7.7,8.0,8.8,8.9],
+          borderColor:C.red,backgroundColor:C.redA,fill:true,tension:0.35,
+          pointRadius:5,pointBackgroundColor:'#fff',pointBorderColor:C.red,pointBorderWidth:2,borderWidth:2}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false}},
+        scales:{y:{min:5,max:10,ticks:{callback:v=>v+'%'},grid:{color:'#F3F4F6'}}}
+      }
+    });
+  }
+
+  if (name === 'demographics') {
+    /* Ethnicity */
+    new Chart(document.getElementById('chartEthnicity'), {
+      type:'doughnut',
+      data:{labels:['White (91.9%)','Asian (4.5%)','Black (1.4%)','Chinese/Other (0.8%)','Mixed (0.7%)','Missing (0.7%)'],
+        datasets:[{data:[665945,32760,9950,5840,4765,5365],backgroundColor:[C.indigo,'#D97706','#DB2777','#16A34A','#7C78EA','#D1D5DB'],borderWidth:0}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+        plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}
+      }
+    });
+
+    /* Region */
+    new Chart(document.getElementById('chartRegion'), {
+      type:'bar',
+      data:{labels:['East','E.Mid','Yorks','S.West','N.West','S.East','N.East','London','W.Mid','NA'],
+        datasets:[{data:[160115,147210,101355,80525,71160,44255,34080,30020,27980,27925],backgroundColor:'rgba(94,90,219,0.55)',borderRadius:6,barPercentage:0.7}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{callback:v=>(v/1000)+'k'},grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:10}},grid:{display:false}}}
+      }
+    });
+
+    /* Comorbidities */
+    const cL=['CKD','Hypertension','CHD (PRIMIS)','Anxiety/depression','Cancer','CNS disease','Diabetes','CKD 3-5','Hearing loss','Atrial fib','CHD','Resp disease','Asthma','Stroke/TIA','Heart failure','COPD','Connective tissue','Immunosuppression dx','Dementia','IBS','CLD','Chemotherapy','Severe mental illness','Severe obesity','Learning disability','Asplenia'];
+    const cV=[91.5,49.3,44.6,37.5,28.7,27.9,25.5,23.4,21.6,18.3,17.9,17.5,16.0,12.8,12.6,12.0,10.7,9.8,9.5,6.8,5.9,5.9,2.7,1.9,1.5,1.2];
+    new Chart(document.getElementById('chartComorb'), {
+      type:'bar',
+      data:{labels:cL,
+        datasets:[{data:cV,backgroundColor:cV.map(v=>v>40?'rgba(220,38,38,0.55)':v>20?'rgba(217,119,6,0.55)':v>10?'rgba(94,90,219,0.45)':'rgba(22,163,74,0.45)'),borderRadius:6,barPercentage:0.7}]
+      },
+      options:{responsive:true,maintainAspectRatio:false,indexAxis:'y',
+        plugins:{legend:{display:false}},
+        scales:{x:{ticks:{callback:v=>v+'%'},max:100,grid:{color:'#F3F4F6'}},y:{ticks:{font:{size:9.5}},grid:{display:false}}}
+      }
+    });
+  }
+}
+
 /* ---- Navigation ---- */
 function go(name) {
   document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   document.getElementById('tab-' + name).classList.add('active');
   event.currentTarget.classList.add('active');
-  setTimeout(() => window.dispatchEvent(new Event('resize')), 60);
+  /* Init charts after the tab is visible */
+  requestAnimationFrame(() => initTab(name));
 }
 
-/* ---- Chart Defaults ---- */
-Chart.defaults.font.family = "'Inter', sans-serif";
-Chart.defaults.color = '#9CA3AF';
-Chart.defaults.borderColor = '#F3F4F6';
-Chart.defaults.plugins.legend.labels.boxWidth = 12;
-Chart.defaults.plugins.legend.labels.padding = 16;
-Chart.defaults.scale.grid = { color: '#F3F4F6', drawBorder: false };
-
-const indigo = '#5E5ADB';
-const indigoAlpha = 'rgba(94,90,219,0.12)';
-const red = '#DC2626';
-const redAlpha = 'rgba(220,38,38,0.10)';
-const amber = '#D97706';
-const amberAlpha = 'rgba(217,119,6,0.10)';
-const blue = '#2563EB';
-const blueAlpha = 'rgba(37,99,235,0.10)';
-const green = '#16A34A';
-
-/* ---- Mortality ---- */
-new Chart(document.getElementById('chartMortality'), {
-  type: 'bar',
-  data: {
-    labels: ['Pre-COVID','During COVID','Post-COVID'],
-    datasets: [
-      { label:'30-day', data:[17.4,20.8,18.7], backgroundColor:'rgba(220,38,38,0.65)', borderRadius:6 },
-      { label:'90-day', data:[25.0,28.9,26.3], backgroundColor:'rgba(217,119,6,0.65)', borderRadius:6 },
-      { label:'365-day', data:[35.6,38.6,35.7], backgroundColor:'rgba(94,90,219,0.55)', borderRadius:6 },
-    ]
-  },
-  options: {
-    responsive:true, maintainAspectRatio:false,
-    plugins: { legend: { labels:{font:{size:11}} } },
-    scales: {
-      x: { grid:{display:false} },
-      y: { ticks:{callback:v=>v+'%'}, max:45, grid:{color:'#F3F4F6'} }
-    }
-  }
-});
-
-/* ---- Annual ---- */
-new Chart(document.getElementById('chartAnnual'), {
-  type: 'bar',
-  data: {
-    labels: ['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
-    datasets: [
-      { label:'Non-resistant', data:[105260,98655,88770,64995,69530,71745,71265,67480,30880], backgroundColor:'rgba(94,90,219,0.55)', borderRadius:4 },
-      { label:'Resistant', data:[7630,7745,7065,5665,6190,6010,6210,6495,3030], backgroundColor:'rgba(220,38,38,0.65)', borderRadius:4 },
-    ]
-  },
-  options: {
-    responsive:true, maintainAspectRatio:false,
-    plugins: { legend:{labels:{font:{size:11}}} },
-    scales: {
-      x: { stacked:true, grid:{display:false} },
-      y: { stacked:true, ticks:{callback:v=>(v/1000)+'k'} }
-    }
-  }
-});
-
-/* ---- Monthly ---- */
-const mt=[7780,7030,8170,9865,10325,9965,10255,9980,9485,9865,9725,10445,10440,9200,9670,8665,8815,8375,8970,8905,8210,8495,8240,8420,8785,7765,8090,8080,8085,7595,8270,8085,7740,7795,7545,7995,7350,6530,5500,4335,4730,5135,5795,6445,6160,6475,5975,6230,6330,5420,6040,6120,6480,6460,6660,6580,6400,6425,6330,6475,6160,5780,6460,6175,6525,6375,6710,6475,6425,6730,6475,7470,6610,5785,6505,6225,6495,6565,6635,6675,6420,6560,6355,6655,6455,5890,6165,6045,6410,6030,6115,6265,6010,6385,5980,6210,6035,5255,5855,5435,5590,5740];
-const mr=[515,465,555,650,700,740,700,705,680,710,630,580,640,615,645,730,650,665,665,645,605,645,625,615,620,500,620,610,675,570,635,605,560,590,530,540,485,500,420,360,425,425,520,510,495,520,485,520,525,460,520,560,495,525,540,530,505,505,495,530,480,445,500,460,515,470,540,580,525,505,480,510,500,435,475,485,525,570,595,530,550,570,500,475,510,480,540,560,570,530,540,580,575,540,535,530,510,450,505,510,530,530];
-const ml=[];for(let y=2017;y<=2025;y++){const mx=y===2025?6:12;for(let m=1;m<=mx;m++)ml.push(y+'-'+(m<10?'0':'')+m);}
-const mp=mt.map((v,i)=>((mr[i]/v)*100).toFixed(1));
-
-new Chart(document.getElementById('chartMonthly'), {
-  type: 'line',
-  data: {
-    labels: ml,
-    datasets: [{
-      label:'Total BSI', data:mt,
-      borderColor:indigo, backgroundColor:indigoAlpha, fill:true,
-      tension:0.35, pointRadius:0, borderWidth:2, yAxisID:'y',
-    },{
-      label:'% Resistant', data:mp,
-      borderColor:red, borderDash:[5,4], tension:0.35,
-      pointRadius:0, borderWidth:1.5, yAxisID:'y1',
-    }]
-  },
-  options: {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{legend:{labels:{font:{size:10}}}},
-    scales: {
-      x:{ticks:{maxTicksLimit:12,font:{size:9}},grid:{display:false}},
-      y:{position:'left',ticks:{callback:v=>(v/1000)+'k',color:indigo},grid:{color:'#F3F4F6'}},
-      y1:{position:'right',min:4,max:12,ticks:{callback:v=>v+'%',color:red},grid:{display:false}}
-    }
-  }
-});
-
-/* ---- % Resistant ---- */
-new Chart(document.getElementById('chartPctResistant'), {
-  type: 'line',
-  data: {
-    labels:['2017','2018','2019','2020','2021','2022','2023','2024','2025*'],
-    datasets:[{
-      label:'% Resistant',data:[6.8,7.3,7.4,8.0,8.2,7.7,8.0,8.8,8.9],
-      borderColor:red,backgroundColor:redAlpha,fill:true,tension:0.35,
-      pointRadius:5,pointBackgroundColor:'#fff',pointBorderColor:red,pointBorderWidth:2,borderWidth:2,
-    }]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,
-    plugins:{legend:{display:false}},
-    scales:{y:{min:5,max:10,ticks:{callback:v=>v+'%'}}}
-  }
-});
-
-/* ---- Ethnicity ---- */
-new Chart(document.getElementById('chartEthnicity'), {
-  type: 'doughnut',
-  data: {
-    labels:['White (91.9%)','Asian (4.5%)','Black (1.4%)','Chinese/Other (0.8%)','Mixed (0.7%)','Missing (0.7%)'],
-    datasets:[{data:[665945,32760,9950,5840,4765,5365],backgroundColor:[indigo,'#D97706','#DB2777','#16A34A','#7C78EA','#D1D5DB'],borderWidth:0}]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,
-    cutout:'62%',
-    plugins:{legend:{position:'right',labels:{font:{size:10},boxWidth:10,padding:8}}}
-  }
-});
-
-/* ---- Region ---- */
-new Chart(document.getElementById('chartRegion'), {
-  type: 'bar',
-  data: {
-    labels:['East','E.Mid','Yorks','S.West','N.West','S.East','N.East','London','W.Mid','NA'],
-    datasets:[{data:[160115,147210,101355,80525,71160,44255,34080,30020,27980,27925],backgroundColor:'rgba(94,90,219,0.55)',borderRadius:6,barPercentage:0.7}]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,indexAxis:'y',
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{ticks:{callback:v=>(v/1000)+'k'},grid:{color:'#F3F4F6'}},
-      y:{ticks:{font:{size:10}},grid:{display:false}}
-    }
-  }
-});
-
-/* ---- Comorbidities ---- */
-const cL=['CKD','Hypertension','CHD (PRIMIS)','Anxiety/depression','Cancer','CNS disease','Diabetes','CKD 3-5','Hearing loss','Atrial fib','CHD','Resp disease','Asthma','Stroke/TIA','Heart failure','COPD','Connective tissue','Immunosuppression dx','Dementia','IBS','CLD','Chemotherapy','Severe mental illness','Severe obesity','Learning disability','Asplenia'];
-const cV=[91.5,49.3,44.6,37.5,28.7,27.9,25.5,23.4,21.6,18.3,17.9,17.5,16.0,12.8,12.6,12.0,10.7,9.8,9.5,6.8,5.9,5.9,2.7,1.9,1.5,1.2];
-new Chart(document.getElementById('chartComorb'), {
-  type: 'bar',
-  data: {
-    labels:cL,
-    datasets:[{data:cV,backgroundColor:cV.map(v=>v>40?'rgba(220,38,38,0.55)':v>20?'rgba(217,119,6,0.55)':v>10?'rgba(94,90,219,0.45)':'rgba(22,163,74,0.45)'),borderRadius:6,barPercentage:0.7}]
-  },
-  options:{
-    responsive:true,maintainAspectRatio:false,indexAxis:'y',
-    plugins:{legend:{display:false}},
-    scales:{
-      x:{ticks:{callback:v=>v+'%'},max:100,grid:{color:'#F3F4F6'}},
-      y:{ticks:{font:{size:9.5}},grid:{display:false}}
-    }
-  }
-});
+/* Init the default visible tab */
+initTab('overview');
 </script>
 
 </body>
